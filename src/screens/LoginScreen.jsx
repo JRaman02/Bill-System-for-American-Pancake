@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image, Pressable } from 'react-native'; // Import the icon library
+import {HomeIcon} from 'react-native-heroicons/outline';
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
+    // Check for empty fields
+    if (!username || !password) {
+      Alert.alert('Login failed', 'Please enter both username and password');
+      return;
+    }
+
     console.log('Login attempted:', username, password); // Debugging line
     if (username === 'admin' && password === 'adminpass') {
       navigation.navigate('AdminPage');
@@ -18,6 +25,8 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+      </View>
       <Image 
         source={require('../assets/images/logo.png')} // Adjust the path as necessary
         style={styles.img} 
@@ -50,6 +59,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
     padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 10,
   },
   title: {
     fontSize: 28,
@@ -85,14 +106,14 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   loginButtonText: {
-    color: '#fff', // Set to white for better visibility
+    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
   },
   img: {
-    width: 300, // Set your desired width
-    height: 300, // Set your desired height
-    marginBottom: 20, // Space between image and text
+    width: 300,
+    height: 300,
+    marginBottom: 20,
   },
 });
 

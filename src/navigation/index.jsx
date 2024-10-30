@@ -16,6 +16,7 @@ import AddTablePage from '../components/AddTablePage';
 import PancakePage from '../components/PancakePage';
 import menuItems from '../components/menuItems';
 
+
 const Stack = createNativeStackNavigator();
 
 function AppNavigation() {
@@ -27,7 +28,7 @@ function AppNavigation() {
                 <Stack.Screen name="UserPage" component={UserPage} />
                 <Stack.Screen name="Home" component={HomeScreen} />
                 <Stack.Screen name="Welcome" component={WelcomeScreen} />
-                <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} /> 
+                <Stack.Screen name="RecipeDetailScreen" component={RecipeDetailScreen} /> 
                 <Stack.Screen name='Booking_Table' component={Booking_Table} />
                 <Stack.Screen name='Home_Delivery' component={Home_Delivery} />
                 <Stack.Screen name='ConfirmationMessage' component={ConfirmationMessage} />
@@ -36,6 +37,8 @@ function AppNavigation() {
                 <Stack.Screen name='AddTablePage' component={AddTablePage} />
                 <Stack.Screen name='PancakePage' component={PancakePage} />
                 <Stack.Screen name='menuItems' component={menuItems} />
+                
+
                 
             </Stack.Navigator>
         </NavigationContainer>

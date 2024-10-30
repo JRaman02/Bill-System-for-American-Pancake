@@ -1,5 +1,5 @@
 {
-  "name": "American",
+  "name": "american",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -19,6 +19,7 @@
     "@react-navigation/stack": "^6.4.1",
     "axios": "^0.21.4",
     "expo": "^51.0.34",
+    "express": "^4.21.1",
     "merge-options": "^3.0.4",
     "nativewind": "^2.0.11",
     "openai": "^4.68.0",
@@ -67,5 +68,10 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "description": "This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

@@ -23,6 +23,7 @@ const AdminPage = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      
       {/* Add Image at the top */}
       <Image 
         source={require('../assets/images/logo.png')} // Adjust the path as necessary
