@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image, Pressable } from 'react-native';
+import { HomeIcon } from 'react-native-heroicons/outline';
 
 // Import images
 const mapleButterImage = require('../assets/images/1.jpg');
@@ -27,7 +28,7 @@ const menuItems = [
   { id: '10', name: 'KitKal Loaded', price: 70, image: KitKal_Loaded },
 ];
 
-const MenuListPage = () => {
+const MenuListPage = ({ navigation }) => {  // Make sure `navigation` is passed as a prop
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <Image source={item.image} style={styles.image} />
@@ -38,6 +39,11 @@ const MenuListPage = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Pressable onPress={() => navigation.navigate('Home')} style={styles.home}>
+          <HomeIcon size={28} color="black" />
+        </Pressable>
+      </View>
       <Image 
         source={require('../assets/images/logo.png')} // Adjust the path as necessary
         style={styles.img} 
@@ -97,7 +103,14 @@ const styles = StyleSheet.create({
   img: {
     width: 300, // Set your desired width
     height: 200, // Set your desired height
-    
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingVertical: 10,
+  },
+  home: {
+    marginLeft: 10,
   },
 });
 

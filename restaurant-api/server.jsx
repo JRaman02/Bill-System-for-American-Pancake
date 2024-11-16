@@ -106,9 +106,19 @@ const restaurantData = [
   ];
   
   // Define the API route to get restaurant data
-  app.get('/api/restaurants', (req, res) => {
-    res.json({ restaurantData });
-  });
+  
+  // Define the API route to get details of a specific restaurant by ID
+ app.get('/api/restaurants/:id', (req, res) => {
+  const restaurantId = req.params.id;
+  const restaurant = restaurantData.find(r => r.id === restaurantId);
+
+  if (restaurant) {
+      res.json(restaurant);
+  } else {
+      res.status(404).json({ message: 'Restaurant not found' });
+  }
+});
+
   
   // Start the server
   app.listen(port, () => {

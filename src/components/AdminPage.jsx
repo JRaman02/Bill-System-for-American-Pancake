@@ -1,7 +1,45 @@
-import React from 'react';
-import { View, Text, Button, StyleSheet, Image } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Image,
+  Pressable,
+  Animated,
+} from 'react-native';
+import { ArrowLeftIcon } from 'react-native-heroicons/outline';
 
 const AdminPage = ({ navigation }) => {
+  // Animated values
+  const logoOpacity = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(0.5)).current;
+  const buttonOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Animation sequence for logo
+    Animated.parallel([
+      Animated.timing(logoOpacity, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.spring(logoScale, {
+        toValue: 1,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Staggered button animations
+    Animated.timing(buttonOpacity, {
+      toValue: 1,
+      duration: 1000,
+      delay: 500,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
   // Function to handle Menu button press
   const handleMenuPress = (action) => {
     if (action === 'MenuListPage') {
@@ -23,29 +61,61 @@ const AdminPage = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      
-      {/* Add Image at the top */}
-      <Image 
+      {/* Header with back button */}
+      <View style={styles.header}>
+        <Pressable onPress={() => navigation.navigate('Login')} style={styles.home}>
+          <ArrowLeftIcon size={28} color="black" />
+        </Pressable>
+      </View>
+
+      {/* Add Animated Image at the top */}
+      <Animated.Image
         source={require('../assets/images/logo.png')} // Adjust the path as necessary
-        style={styles.image} 
+        style={[
+          styles.image,
+          {
+            opacity: logoOpacity,
+            transform: [{ scale: logoScale }],
+          },
+        ]}
       />
       <Text style={styles.title}>Welcome to the Admin Page</Text>
 
-      <View style={styles.buttonContainer}>
+      <Animated.View
+        style={[
+          styles.buttonContainer,
+          { opacity: buttonOpacity },
+        ]}
+      >
         <Button title="View Menu" onPress={() => handleMenuPress('MenuListPage')} />
-      </View>
+      </Animated.View>
 
-      <View style={styles.buttonContainer}>
+      <Animated.View
+        style={[
+          styles.buttonContainer,
+          { opacity: buttonOpacity },
+        ]}
+      >
         <Button title="Add Menu" onPress={() => handleMenuPress('AddMenuPage')} />
-      </View>
+      </Animated.View>
 
-      <View style={styles.buttonContainer}>
+      <Animated.View
+        style={[
+          styles.buttonContainer,
+          { opacity: buttonOpacity },
+        ]}
+      >
         <Button title="Add Table" onPress={handleAddTablePress} />
-      </View>
+      </Animated.View>
 
-      <View style={styles.buttonContainer}>
+      <Animated.View
+        style={[
+          styles.buttonContainer,
+          { opacity: buttonOpacity },
+        ]}
+      >
         <Button title="Pancake" onPress={handlePancakePress} />
-      </View>
+      </Animated.View>
     </View>
   );
 };
@@ -58,6 +128,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
   },
+  header: {
+    position: 'absolute',
+    top: 40, // Adjust based on where you want the header to appear
+    left: 10,
+    zIndex: 1, // Ensure the back button stays on top of other elements
+  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -67,9 +143,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: '80%',
   },
+  home: {
+    padding: 5,
+  },
   image: {
     width: '100%', // Adjust the width to fit the container
-    height: 200,   // Adjust the height as necessary
+    height: 200, // Adjust the height as necessary
     marginBottom: 20, // Add some space below the image
   },
 });

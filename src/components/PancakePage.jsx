@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FlatList, View, Text, Image, StyleSheet, Button, Alert } from 'react-native';
+import { FlatList, View, Text, Image, StyleSheet, Button, Pressable, Alert } from 'react-native';
 import RNPrint from 'react-native-print';
+import { HomeIcon } from 'react-native-heroicons/outline';
 
 // Image imports
 const mapleButterImage = require('../assets/images/1.jpg');
@@ -13,6 +14,9 @@ const oreoFillingsImage = require('../assets/images/7.jpg');
 const butterScotchImage = require('../assets/images/8.jpg');
 const cottonCandyImage = require('../assets/images/9.jpg');
 const kitKatLoadedImage = require('../assets/images/10.jpg');
+
+// Logo image for the PDF bill (converted to base64 or external URL if possible)
+const logo = require('../assets/images/logo.png'); // Update with local image if needed
 
 // Menu items
 const menuItems = [
@@ -28,7 +32,7 @@ const menuItems = [
   { id: '10', name: 'KitKat Loaded', price: 70, image: kitKatLoadedImage },
 ];
 
-const PancakePage = () => {
+const PancakePage = ({ navigation }) => {
   const [selectedItems, setSelectedItems] = useState([]);
 
   const addItemToBill = (item) => {
@@ -45,10 +49,13 @@ const PancakePage = () => {
       .join('<br/>');
     const totalAmount = calculateTotalBill();
     return `
-      <center><h1>Bill</h1>
-      <p>Items:</p>
-      <p>${itemList}</p>
-      <p><strong>Total: Rs ${totalAmount}</strong></p></center>
+      <center>
+        <h1>Bill</h1>
+        <img src="${logo}" style="width: 100px; height: auto;" />
+        <p>Items:</p>
+        <p>${itemList}</p>
+        <p><strong>Total: Rs ${totalAmount}</strong></p>
+      </center>
     `;
   };
 
@@ -66,8 +73,13 @@ const PancakePage = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Pressable onPress={() => navigation.navigate('Home')} style={styles.home}>
+          <HomeIcon size={28} color="black" />
+        </Pressable>
+      </View>
       <Image 
-        source={require('../assets/images/logo.png')} // Adjust the path as necessary
+        source={require('../assets/images/logo.png')} // Update with your actual logo path
         style={styles.img} 
       />
       <FlatList
@@ -78,7 +90,9 @@ const PancakePage = () => {
             <Image source={item.image} style={styles.image} />
             <Text style={styles.name}>{item.name}</Text>
             <Text style={styles.price}>Rs {item.price}</Text>
-            <Button title="Add" onPress={() => addItemToBill(item)} />
+            <Pressable style={styles.addButton} onPress={() => addItemToBill(item)}>
+              <Text style={styles.addButtonText}>Add</Text>
+            </Pressable>
           </View>
         )}
       />
@@ -98,6 +112,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
+    marginVertical: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
   image: {
     width: 50,
@@ -111,6 +128,16 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginRight: 10,
+  },
+  addButton: {
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 5,
+  },
+  addButtonText: {
+    color: 'white',
+    fontSize: 14,
   },
   billContainer: {
     padding: 20,

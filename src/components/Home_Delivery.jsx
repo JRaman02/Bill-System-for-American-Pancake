@@ -156,8 +156,8 @@ const HomeDelivery = () => {
           <CheckBox
             checked={!!selectedItems[item.id]}
             onPress={() => handleCheckboxChange(item.id)}
-            checkedIcon={<Text style={styles.checkedIcon}>✓</Text>} 
-            uncheckedIcon={<Text style={styles.uncheckedIcon}>✗</Text>}
+            checkedIcon={<Text style={styles.checkedIcon}>✅</Text>} 
+            uncheckedIcon={<Text style={styles.uncheckedIcon}>☐</Text>}
           />
         </View>
       ))}
