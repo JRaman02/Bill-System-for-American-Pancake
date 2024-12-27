@@ -1,10 +1,53 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRoute } from '@react-navigation/native';
 
 const RecipeDetailScreen = () => {
   const route = useRoute();
-  const { restaurant } = route.params || {}; // Access restaurant data safely
+  const { restaurantId } = route.params || {}; // Fetch the restaurant ID from route params
+  const [restaurant, setRestaurant] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (restaurantId) {
+      fetch(`http://192.168.29.148:8000/pancake_api/pancake/${restaurantId}/`)  // Fetch restaurant details by ID
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch restaurant data');
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setRestaurant(data);
+        })
+        .catch((err) => {
+          setError(err.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      setError('No restaurant ID provided');
+      setLoading(false);
+    }
+  }, [restaurantId]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   if (!restaurant) {
     return (
@@ -16,7 +59,7 @@ const RecipeDetailScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Image source={restaurant.image} style={styles.image} />
+      <Image source={{ uri: restaurant.image_url }} style={styles.image} />
       <Text style={styles.name}>{restaurant.name}</Text>
       <Text style={styles.rating}>⭐ {restaurant.rating}</Text>
       <Text style={styles.price}>{restaurant.price}</Text>

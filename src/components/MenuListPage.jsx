@@ -1,39 +1,81 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, Image, Pressable } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, Image, Pressable, ActivityIndicator, Button } from 'react-native';
 import { HomeIcon } from 'react-native-heroicons/outline';
 
-// Import images
-const mapleButterImage = require('../assets/images/1.jpg');
-const Dark = require('../assets/images/2.jpg');
-const White = require('../assets/images/3.jpg');
-const Coffee = require('../assets/images/4.jpg');
-const Strawberry = require('../assets/images/5.jpg');
-const Blueberry = require('../assets/images/6.jpg');
-const Oreo_Fillings = require('../assets/images/7.jpg');
-const Butter_Scotch = require('../assets/images/8.jpg');
-const Cotton_Candy = require('../assets/images/9.jpg');
-const KitKal_Loaded = require('../assets/images/10.jpg');
+const MenuListPage = ({ navigation }) => {
+  const [menuItems, setMenuItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-// Menu items
-const menuItems = [
-  { id: '1', name: 'Maple Butter', price: 50, image: mapleButterImage },
-  { id: '2', name: 'Dark Chocolate Heaven', price: 50, image: Dark },
-  { id: '3', name: 'White Chocolate Heaven', price: 60, image: White },
-  { id: '4', name: 'Coffee Bytes', price: 60, image: Coffee },
-  { id: '5', name: 'Strawberry', price: 60, image: Strawberry },
-  { id: '6', name: 'Blueberry', price: 70, image: Blueberry },
-  { id: '7', name: 'Oreo Fillings', price: 70, image: Oreo_Fillings },
-  { id: '8', name: 'Butter Scotch', price: 70, image: Butter_Scotch },
-  { id: '9', name: 'Cotton Candy', price: 60, image: Cotton_Candy },
-  { id: '10', name: 'KitKal Loaded', price: 70, image: KitKal_Loaded },
-];
+  useEffect(() => {
+    fetchMenuItems();
+  }, []);
 
-const MenuListPage = ({ navigation }) => {  // Make sure `navigation` is passed as a prop
+  const fetchMenuItems = async () => {
+    try {
+      const response = await fetch('http://192.168.29.148:8000/pancake_api/pancake/');
+      const data = await response.json();
+      setMenuItems(data);
+    } catch (error) {
+      console.error('Error fetching menu items:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await fetch(`http://192.168.29.148:8000/pancake_api/pancake/${id}/`, {
+        method: 'DELETE',
+      });
+      setMenuItems((prevItems) => prevItems.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting menu item:', error);
+    }
+  };
+
+  const handleUpdate = async (id, updatedData) => {
+    try {
+      const response = await fetch(`http://192.168.29.148:8000/pancake_api/pancake/${id}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+      
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error('Failed to update the item');
+      }
+  
+      const updatedItem = await response.json();
+      console.log('Updated Item:', updatedItem); // Log the response for debugging
+  
+      setMenuItems((prevItems) => 
+        prevItems.map(item => item.id === id ? updatedItem : item)
+      );
+    } catch (error) {
+      console.error('Error updating menu item:', error);
+    }
+  };
+  
+
   const renderItem = ({ item }) => (
     <View style={styles.item}>
-      <Image source={item.image} style={styles.image} />
-      <Text style={styles.pancakeName}>{item.name}</Text>
-      <Text style={styles.price}>Rs: {item.price.toFixed(2)}</Text>
+      <Image source={{ uri: item.image_url }} style={styles.image} />
+      <View style={styles.textContainer}>
+        <Text style={styles.pancakeName}>{item.name}</Text>
+        <Text style={styles.price}>{item.price}</Text>
+        <Text style={styles.rating}>Rating: {item.rating} ⭐</Text>
+      </View>
+      <View style={styles.buttonsContainer}>
+        <Pressable onPress={() => handleUpdate(item.id, { name: 'Updated Pancake', price: 'Updated Price' })} style={styles.updateButton}>
+          <Text style={styles.buttonText}>Update</Text>
+        </Pressable>
+        <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
+          <Text style={styles.buttonText}>Delete</Text>
+        </Pressable>
+      </View>
     </View>
   );
 
@@ -45,15 +87,19 @@ const MenuListPage = ({ navigation }) => {  // Make sure `navigation` is passed 
         </Pressable>
       </View>
       <Image 
-        source={require('../assets/images/logo.png')} // Adjust the path as necessary
+        source={require('../assets/images/logo.png')} 
         style={styles.img} 
       />
       <Text style={styles.title}>Pancake Menu</Text>
-      <FlatList
-        data={menuItems}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#000" />
+      ) : (
+        <FlatList
+          data={menuItems}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      )}
     </View>
   );
 };
@@ -84,25 +130,43 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 3,
     flexDirection: 'row',
-    alignItems: 'center',
+  },
+  textContainer: {
+    flex: 1,
+    marginLeft: 10,
   },
   image: {
-    width: 50,
-    height: 50,
+    width: 80,
+    height: 80,
     borderRadius: 5,
-    marginRight: 10,
   },
   pancakeName: {
     fontSize: 18,
-    flex: 1,
+    fontWeight: 'bold',
   },
   price: {
     fontSize: 16,
     color: '#555',
   },
+  rating: {
+    fontSize: 14,
+    color: '#888',
+  },
+  time: {
+    fontSize: 14,
+    color: '#888',
+  },
+  cuisine: {
+    fontSize: 14,
+    color: '#888',
+  },
+  discount: {
+    fontSize: 14,
+    color: 'green',
+  },
   img: {
-    width: 300, // Set your desired width
-    height: 200, // Set your desired height
+    width: 300,
+    height: 200,
   },
   header: {
     flexDirection: 'row',
@@ -111,6 +175,25 @@ const styles = StyleSheet.create({
   },
   home: {
     marginLeft: 10,
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  updateButton: {
+    backgroundColor: '#4CAF50',
+    padding: 5,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  deleteButton: {
+    backgroundColor: '#f44336',
+    padding: 5,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 

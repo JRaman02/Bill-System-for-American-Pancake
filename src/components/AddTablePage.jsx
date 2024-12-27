@@ -4,17 +4,38 @@ import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-nativ
 const AddTablePage = () => {
   const [tableData, setTableData] = useState([]);
   const [inputValue, setInputValue] = useState('');
+  const [tableType, setTableType] = useState('single'); // You can change this as needed
 
   const addEntry = () => {
     if (inputValue.trim()) {
-      setTableData([...tableData, { id: Date.now().toString(), value: inputValue }]);
-      setInputValue('');
+      const newTable = {
+        number: inputValue,
+        type: tableType,
+      };
+
+      // Send data to the API
+      fetch('http://192.168.29.148:8000/pancake_api/table/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTable),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // Add the new table data to the state with the returned ID from the API
+          setTableData([...tableData, { id: data.id, value: data.number }]);
+          setInputValue('');
+        })
+        .catch((error) => {
+          console.error('Error adding table:', error);
+        });
     }
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
-      <Text>{item.value}</Text>
+      <Text>{`Table Number: ${item.value}, Type: ${item.type || 'N/A'}`}</Text>
     </View>
   );
 
@@ -23,7 +44,13 @@ const AddTablePage = () => {
       <Text style={styles.header}>Add Table Entry</Text>
       <TextInput
         style={styles.input}
-        placeholder="Enter value"
+        placeholder="Enter table number"
+        value={inputValue}
+        onChangeText={setInputValue}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="type"
         value={inputValue}
         onChangeText={setInputValue}
       />
@@ -31,7 +58,7 @@ const AddTablePage = () => {
       <FlatList
         data={tableData}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         style={styles.list}
       />
     </View>

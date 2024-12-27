@@ -5,6 +5,7 @@ import HomeScreen from '../screens/HomeScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
 import RecipeDetailScreen from '../screens/RecipeDetailScreen';
 import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 import AdminPage from '../components/AdminPage';
 import UserPage from '../components/UserPage';
 import Booking_Table from '../components/Booking_Table';
@@ -15,6 +16,14 @@ import AddMenuPage from '../components/AddMenuPage';
 import AddTablePage from '../components/AddTablePage';
 import PancakePage from '../components/PancakePage';
 import menuItems from '../components/menuItems';
+import TPPage from '../components/TPPage';
+import OrderListPage from '../components/OrderListPage';
+import OrderDetailPage from '../components/OrderDetailPage';
+
+
+
+
+
 
 
 const Stack = createNativeStackNavigator();
@@ -24,6 +33,7 @@ function AppNavigation() {
         <NavigationContainer>
             <Stack.Navigator initialRouteName='Welcome' screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
                 <Stack.Screen name="AdminPage" component={AdminPage} />
                 <Stack.Screen name="UserPage" component={UserPage} />
                 <Stack.Screen name="Home" component={HomeScreen} />
@@ -37,9 +47,11 @@ function AppNavigation() {
                 <Stack.Screen name='AddTablePage' component={AddTablePage} />
                 <Stack.Screen name='PancakePage' component={PancakePage} />
                 <Stack.Screen name='menuItems' component={menuItems} />
+                <Stack.Screen name='TPPage' component={TPPage} />
+                <Stack.Screen name='OrderListPage' component={OrderListPage} />
+                <Stack.Screen name="OrderDetail" component={OrderDetailPage} />
                 
-
-                
+                   
             </Stack.Navigator>
         </NavigationContainer>
     );

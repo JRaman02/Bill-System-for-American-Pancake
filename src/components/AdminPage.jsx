@@ -1,13 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  Image,
-  Pressable,
-  Animated,
-} from 'react-native';
+import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import { ArrowLeftIcon } from 'react-native-heroicons/outline';
 
 const AdminPage = ({ navigation }) => {
@@ -15,6 +7,7 @@ const AdminPage = ({ navigation }) => {
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const logoScale = useRef(new Animated.Value(0.5)).current;
   const buttonOpacity = useRef(new Animated.Value(0)).current;
+  const buttonScale = useRef(new Animated.Value(0.8)).current;
 
   useEffect(() => {
     // Animation sequence for logo
@@ -32,31 +25,45 @@ const AdminPage = ({ navigation }) => {
     ]).start();
 
     // Staggered button animations
-    Animated.timing(buttonOpacity, {
-      toValue: 1,
-      duration: 1000,
-      delay: 500,
-      useNativeDriver: true,
-    }).start();
+    Animated.stagger(300, [
+      Animated.timing(buttonOpacity, {
+        toValue: 1,
+        duration: 1000,
+        delay: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonScale, {
+        toValue: 1,
+        duration: 500,
+        delay: 500,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
 
-  // Function to handle Menu button press
+  // Navigation handlers
   const handleMenuPress = (action) => {
     if (action === 'MenuListPage') {
-      navigation.navigate('MenuListPage'); // Navigate to List of Menu
+      navigation.navigate('MenuListPage');
     } else if (action === 'AddMenuPage') {
-      navigation.navigate('AddMenuPage'); // Navigate to Add Menu Page
+      navigation.navigate('AddMenuPage');
     }
   };
 
-  // Function to handle Add Table button press
   const handleAddTablePress = () => {
-    navigation.navigate('AddTablePage'); // Navigate to Add Table Page
+    navigation.navigate('AddTablePage');
   };
 
-  // Function to handle Add Pancake button press
   const handlePancakePress = () => {
-    navigation.navigate('PancakePage'); // Navigate to Add Pancake Page
+    navigation.navigate('PancakePage');
+  };
+
+  const handleViewTablePress = () => {
+    navigation.navigate('TPPage');
+  };
+
+  const handleHomeDeliveryPress = () => {
+    navigation.navigate('OrderListPage');
   };
 
   return (
@@ -71,85 +78,109 @@ const AdminPage = ({ navigation }) => {
       {/* Add Animated Image at the top */}
       <Animated.Image
         source={require('../assets/images/logo.png')} // Adjust the path as necessary
-        style={[
-          styles.image,
-          {
-            opacity: logoOpacity,
-            transform: [{ scale: logoScale }],
-          },
-        ]}
+        style={[styles.image, { opacity: logoOpacity, transform: [{ scale: logoScale }] }]}
       />
       <Text style={styles.title}>Welcome to the Admin Page</Text>
 
-      <Animated.View
-        style={[
-          styles.buttonContainer,
-          { opacity: buttonOpacity },
-        ]}
-      >
-        <Button title="View Menu" onPress={() => handleMenuPress('MenuListPage')} />
-      </Animated.View>
-
-      <Animated.View
-        style={[
-          styles.buttonContainer,
-          { opacity: buttonOpacity },
-        ]}
-      >
-        <Button title="Add Menu" onPress={() => handleMenuPress('AddMenuPage')} />
-      </Animated.View>
-
-      <Animated.View
-        style={[
-          styles.buttonContainer,
-          { opacity: buttonOpacity },
-        ]}
-      >
-        <Button title="Add Table" onPress={handleAddTablePress} />
-      </Animated.View>
-
-      <Animated.View
-        style={[
-          styles.buttonContainer,
-          { opacity: buttonOpacity },
-        ]}
-      >
-        <Button title="Pancake" onPress={handlePancakePress} />
-      </Animated.View>
+      {/* Button Grid */}
+      <View style={styles.buttonGrid}>
+        {['View Menu', 'Add Menu', 'Add Table', 'Table Booking', 'Home Delivery', 'Pancake'].map(
+          (title) => (
+            <Animated.View
+              key={title}
+              style={[
+                styles.buttonWrapper,
+                {
+                  opacity: buttonOpacity,
+                  transform: [{ scale: buttonScale }],
+                },
+              ]}
+            >
+              <Pressable
+                style={({ pressed }) => [
+                  styles.button,
+                  pressed && styles.buttonPressed,
+                ]}
+                onPress={() => {
+                  if (title === 'View Menu') handleMenuPress('MenuListPage');
+                  else if (title === 'Add Menu') handleMenuPress('AddMenuPage');
+                  else if (title === 'Add Table') handleAddTablePress();
+                  else if (title === 'Table Booking') handleViewTablePress();
+                  else if (title === 'Home Delivery') handleHomeDeliveryPress();
+                  else if (title === 'Pancake') handlePancakePress();
+                }}
+              >
+                <Text style={styles.buttonText}>{title}</Text>
+              </Pressable>
+            </Animated.View>
+          )
+        )}
+      </View>
     </View>
   );
 };
 
-// Basic styles
+// Basic styles with improvements
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#02b541',
   },
   header: {
     position: 'absolute',
-    top: 40, // Adjust based on where you want the header to appear
+    top: 40,
     left: 10,
-    zIndex: 1, // Ensure the back button stays on top of other elements
+    zIndex: 1,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  buttonContainer: {
-    marginTop: 20,
-    width: '80%',
+    color: '#333',
+    marginBottom: 30,
+    textAlign: 'center',
+    paddingHorizontal: 20,
   },
   home: {
     padding: 5,
   },
   image: {
-    width: '100%', // Adjust the width to fit the container
-    height: 200, // Adjust the height as necessary
-    marginBottom: 20, // Add some space below the image
+    width: 300,
+    height: 150,
+    marginBottom: 10,
+  },
+  buttonGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    width: '90%',
+    marginTop: 20,
+  },
+  buttonWrapper: {
+    width: '48%', // 50% minus some spacing for a grid
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  button: {
+    backgroundColor: '#b0128b',
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    width: '100%',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  buttonPressed: {
+    opacity: 0.8,
   },
 });
 

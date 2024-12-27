@@ -8,21 +8,30 @@ export default function WelcomeScreen() {
 
   // Animated values
   const logoScale = useRef(new Animated.Value(0)).current;
+  const logoRotate = useRef(new Animated.Value(0)).current; // Rotation for logo
   const textOpacity = useRef(new Animated.Value(0)).current;
-  const textTranslateY = useRef(new Animated.Value(20)).current; // Start slightly below
+  const textTranslateY = useRef(new Animated.Value(20)).current;
+  const titleColor = useRef(new Animated.Value(0)).current; // Color animation for text
 
   useEffect(() => {
-    // Animate logo (fade-in with scaling)
-    Animated.spring(logoScale, {
-      toValue: 1,
-      friction: 5,
-      tension: 100,
-      useNativeDriver: true,
-    }).start();
+    // Animate logo (fade-in with scaling and rotation)
+    Animated.parallel([
+      Animated.spring(logoScale, {
+        toValue: 1,
+        friction: 5,
+        tension: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(logoRotate, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
-    // Animate text (fade-in and slide-up)
+    // Animate text (fade-in, slide-up, and color change)
     Animated.sequence([
-      Animated.delay(500), // Wait for logo animation to start
+      Animated.delay(500),
       Animated.parallel([
         Animated.timing(textOpacity, {
           toValue: 1,
@@ -34,20 +43,34 @@ export default function WelcomeScreen() {
           duration: 800,
           useNativeDriver: true,
         }),
+        Animated.timing(titleColor, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
       ]),
     ]).start();
 
     // Navigate to 'Home' after 2.5 seconds
-    const timer = setTimeout(() => navigation.navigate('Home'), 2500);
+    const timer = setTimeout(() => navigation.navigate('Home'), 3000);
     return () => clearTimeout(timer);
   }, [navigation]);
 
+  const interpolateColor = titleColor.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#E4003A', '#ffffff'], // Change from red to white
+  });
+
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#03fff2' }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#E4003A' }}>
       <StatusBar barStyle="light-content" />
+      
       <Animated.View
         style={{
-          transform: [{ scale: logoScale }],
+          transform: [
+            { scale: logoScale },
+            { rotate: logoRotate.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) },
+          ],
           backgroundColor: 'rgba(255,255,255,0.2)',
           borderRadius: 999,
           padding: hp(5.5),
@@ -62,6 +85,7 @@ export default function WelcomeScreen() {
           />
         </View>
       </Animated.View>
+
       <Animated.View
         style={{
           alignItems: 'center',
@@ -70,30 +94,40 @@ export default function WelcomeScreen() {
           transform: [{ translateY: textTranslateY }],
         }}
       >
-        <Text
+        <Animated.Text
           style={{
             fontSize: hp(7),
             fontWeight: 'bold',
-            color: 'blue',
+            color: interpolateColor, // Animated color change
             letterSpacing: 2,
             textAlign: 'center',
-            fontSize: 30,
+            fontFamily:"cursive"
           }}
         >
           American Pancake
-        </Text>
-        <Text
+        </Animated.Text>
+
+        <Animated.Text
           style={{
             fontSize: hp(2.5),
             fontWeight: '500',
             color: 'white',
-            letterSpacing: 2,
             marginTop: 10,
             textAlign: 'center',
+            fontFamily:"san-serif",
+            transform: [
+              {
+                translateX: textTranslateY.interpolate({
+                  inputRange: [-10, 0, 10],
+                  outputRange: [-5, 0, 5],
+                  extrapolate: 'clamp',
+                }),
+              },
+            ], // Adds a slight wiggle effect
           }}
         >
           Snack is always right
-        </Text>
+        </Animated.Text>
       </Animated.View>
     </View>
   );

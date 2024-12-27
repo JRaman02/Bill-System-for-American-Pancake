@@ -1,40 +1,42 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, Alert, StyleSheet, ScrollView, Image, Animated, TouchableOpacity, Pressable } from 'react-native';
 import { CheckBox } from 'react-native-elements';
-import RNPrint from 'react-native-print';
-
-// Import images
-const mapleButterImage = require('../assets/images/1.jpg');
-const Dark = require('../assets/images/2.jpg');
-const White = require('../assets/images/3.jpg');
-const Coffee = require('../assets/images/4.jpg');
-const Strawberry = require('../assets/images/5.jpg');
-const Blueberry = require('../assets/images/6.jpg');
-const Oreo_Fillings = require('../assets/images/7.jpg');
-const Butter_Scotch = require('../assets/images/8.jpg');
-const Cotton_Candy = require('../assets/images/9.jpg');
-const KitKal_Loaded = require('../assets/images/10.jpg');
-
-// Menu items
-const menuItems = [
-  { id: '1', name: 'Maple Butter', price: 50, image: mapleButterImage },
-  { id: '2', name: 'Dark Chocolate Heaven', price: 50, image: Dark },
-  { id: '3', name: 'White Chocolate Heaven', price: 60, image: White },
-  { id: '4', name: 'Coffee Bytes', price: 60, image: Coffee },
-  { id: '5', name: 'Strawberry', price: 60, image: Strawberry },
-  { id: '6', name: 'Blueberry', price: 70, image: Blueberry },
-  { id: '7', name: 'Oreo Fillings', price: 70, image: Oreo_Fillings },
-  { id: '8', name: 'Butter Scotch', price: 70, image: Butter_Scotch },
-  { id: '9', name: 'Cotton Candy', price: 60, image: Cotton_Candy },
-  { id: '10', name: 'KitKal Loaded', price: 70, image: KitKal_Loaded },
-];
+import { ArrowLeftIcon } from 'react-native-heroicons/solid';
+import { useNavigation } from '@react-navigation/native';
 
 const HomeDelivery = () => {
   const [Name, setProgramName] = useState('');
   const [mobileNo, setMobileNo] = useState('');
   const [address, setAddress] = useState('');
   const [selectedItems, setSelectedItems] = useState({});
-  const [totalAmount, setTotalAmount] = useState(0);
+  const [menuItems, setMenuItems] = useState([]);
+
+  const logoAnim = useRef(new Animated.Value(0)).current;
+  const [buttonScale] = useState(new Animated.Value(1));
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    Animated.timing(logoAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      try {
+        const response = await fetch('http://192.168.29.148:8000/pancake_api/pancake/');
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        const data = await response.json();
+        setMenuItems(data);
+      } catch (error) {
+        Alert.alert('Error', `Failed to load menu items: ${error.message}`);
+      }
+    };
+
+    fetchMenuItems();
+  }, []);
 
   const validateMobileNumber = (mobileNo) => {
     const mobileRegex = /^[0-9]{10}$/;
@@ -57,7 +59,7 @@ const HomeDelivery = () => {
       Alert.alert('Validation Error', 'Address is required');
       return false;
     }
-    if (!Object.values(selectedItems).some(item => item)) {
+    if (!Object.values(selectedItems).some((item) => item.selected)) {
       Alert.alert('Validation Error', 'Please select at least one pancake');
       return false;
     }
@@ -65,54 +67,104 @@ const HomeDelivery = () => {
   };
 
   const handleCheckboxChange = (id) => {
-    setSelectedItems(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const calculateTotal = () => {
-    return menuItems.reduce((total, item) => {
-      if (selectedItems[item.id]) {
-        return total + item.price;
+    setSelectedItems((prev) => {
+      const updatedItems = { ...prev };
+      updatedItems[id] = updatedItems[id] || { selected: false, quantity: 0 };
+    
+      // Toggle selection status and set quantity to 1 when selected
+      updatedItems[id].selected = !updatedItems[id].selected;
+      if (updatedItems[id].selected) {
+        updatedItems[id].quantity = 1; // Default quantity to 1 when checked
       }
-      return total;
-    }, 0);
+      return updatedItems;
+    });
   };
 
-  const handlePrint = async () => {
-    const htmlContent = `
-      <center><h1>American Pancake</h1>
-      <p>Name: ${Name}</p>
-      <p>Mobile No: ${mobileNo}</p>
-      <p>Address: ${address}</p>
-      <h2>Pancakes Item:</h2>
-      <ul>
-        ${menuItems
-          .filter(item => selectedItems[item.id])
-          .map(item => `<li>${item.name} - Rs. ${item.price.toFixed(2)}</li>`)
-          .join('')}
-      </ul>
-      <h3>Total Amount: Rs. ${totalAmount.toFixed(2)}</h3></center>
-    `;
-
-    await RNPrint.print({ html: htmlContent });
+  const handleQuantityChange = (id, increment) => {
+    setSelectedItems(prev => {
+      const updatedItems = { ...prev };
+      updatedItems[id] = updatedItems[id] || { selected: false, quantity: 0 };
+      const newQuantity = Math.max(0, updatedItems[id].quantity + increment);
+      updatedItems[id].quantity = newQuantity;
+      return updatedItems;
+    });
   };
 
   const handleSubmit = async () => {
+    console.log("Submit button pressed"); // Debugging line
+    
     if (validateForm()) {
-      const total = calculateTotal();
-      setTotalAmount(total);
-      Alert.alert('Bill Summary', `Total Amount: Rs.${total.toFixed(2)}`, [
-        { text: 'Print Bill', onPress: handlePrint },
-        { text: 'OK', onPress: () => console.log('Order Submitted') },
-      ]);
+      const pancakes = Object.entries(selectedItems)
+        .filter(([_, item]) => item.selected)
+        .map(([id, item]) => ({ id: parseInt(id), quantity: item.quantity }));
+  
+      const orderData = {
+        customer_name: Name,
+        mobile_no: mobileNo,
+        customer_address: address,
+        delivery_time: new Date().toISOString(),
+        pancakes, // Pancakes array with id and quantity
+      };
+  
+      console.log("Order Data:", orderData); // Debugging line to inspect payload
+  
+      try {
+        const response = await fetch('http://192.168.29.148:8000/pancake_api/orders/create/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(orderData),
+        });
+  
+        const result = await response.json();
+        console.log("API Response:", result); // Debugging line to log API response
+  
+        if (response.ok) {
+          Alert.alert('Order Submitted', `Order ID: ${result.id}`);
+        } else {
+          Alert.alert('Error', `Failed to submit order. ${result.message || 'Please try again.'}`);
+        }
+      } catch (error) {
+        console.error('Error occurred:', error);
+        Alert.alert('Error', `An error occurred: ${error.message}`);
+      }
     }
+  };
+  
+
+  const handleButtonPressIn = () => {
+    Animated.spring(buttonScale, {
+      toValue: 0.95,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleButtonPressOut = () => {
+    Animated.spring(buttonScale, {
+      toValue: 1,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image 
-        source={require('../assets/images/logo.png')} // Adjust the path as necessary
-        style={styles.img} 
+      <Animated.Image
+        source={require('../assets/images/logo.png')}
+        style={[styles.img, {
+          transform: [{
+            translateY: logoAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [-200, 0],
+            }),
+          }],
+        }]}
       />
+      <Pressable onPress={() => navigation.navigate('UserPage')} style={styles.homeButton}>
+        <ArrowLeftIcon size={28} color="#fff" />
+      </Pressable>
       <Text style={styles.title}>Home Delivery</Text>
 
       <Text style={styles.label}>Name:</Text>
@@ -146,24 +198,45 @@ const HomeDelivery = () => {
 
       <Text style={styles.subTitle}>Select Pancakes:</Text>
 
-      {menuItems.map(item => (
-        <View key={item.id} style={styles.itemContainer}>
-          <Image source={item.image} style={styles.image} />
-          <View style={styles.itemDetails}>
-            <Text style={styles.itemName}>{item.name}</Text>
-            <Text style={styles.itemPrice}>Rs. {item.price.toFixed(2)}</Text>
+      {menuItems.length > 0 ? (
+        menuItems.map((item) => (
+          <View key={item.id} style={styles.itemContainer}>
+            <Image source={{ uri: item.image_url }} style={styles.image} />
+            <View style={styles.itemDetails}>
+              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemPrice}>Rs.{item.price}</Text>
+            </View>
+            <CheckBox
+              checked={!!selectedItems[item.id]?.selected}
+              onPress={() => handleCheckboxChange(item.id)}
+              checkedIcon={<Text style={styles.checkedIcon}>☑</Text>}
+              uncheckedIcon={<Text style={styles.uncheckedIcon}>☐</Text>}
+            />
+            {selectedItems[item.id]?.selected && (
+              <View style={styles.quantityControls}>
+                <TouchableOpacity onPress={() => handleQuantityChange(item.id, -1)}>
+                  <Text style={styles.quantityButton}>-</Text>
+                </TouchableOpacity>
+                <Text style={styles.quantity}>{selectedItems[item.id]?.quantity}</Text>
+                <TouchableOpacity onPress={() => handleQuantityChange(item.id, 1)}>
+                  <Text style={styles.quantityButton}>+</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
-          <CheckBox
-            checked={!!selectedItems[item.id]}
-            onPress={() => handleCheckboxChange(item.id)}
-            checkedIcon={<Text style={styles.checkedIcon}>✅</Text>} 
-            uncheckedIcon={<Text style={styles.uncheckedIcon}>☐</Text>}
-          />
-        </View>
-      ))}
+        ))
+      ) : (
+        <Text>Loading menu items...</Text>
+      )}
 
       <View style={styles.buttonContainer}>
-        <Button title="Submit" onPress={handleSubmit} color="#4CAF50" />
+        <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+          <TouchableOpacity onPress={handleSubmit}>
+            <View style={styles.submitButton}>
+              <Text style={styles.submitButtonText}>Submit</Text>
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </ScrollView>
   );
@@ -238,20 +311,50 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
   },
+  submitButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    fontSize: 18,
+    color: '#fff',
+  },
   checkedIcon: {
-    fontSize: 24, 
-    color: 'green', 
+    fontSize: 24,
+    color: 'green',
   },
   uncheckedIcon: {
-    fontSize: 24, 
-    color: 'red', 
+    fontSize: 24,
+    color: 'red',
+  },
+  quantityControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  quantityButton: {
+    fontSize: 24,
+    padding: 5,
+    color: '#4CAF50',
+  },
+  quantity: {
+    fontSize: 18,
+    marginHorizontal: 10,
   },
   img: {
-    width: '100%', 
-    height: 200,  
-    marginBottom: 20, 
+    width: '100%',
+    height: 200,
+    marginBottom: 20,
   },
-  
+  homeButton: { 
+    position: "absolute",
+    top: 20,
+    left: 20,
+    padding: 1,
+    backgroundColor: "#4CAF50",
+    borderRadius: 30 
+  },
 });
 
 export default HomeDelivery;

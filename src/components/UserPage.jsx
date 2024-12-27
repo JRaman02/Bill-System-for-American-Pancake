@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, Button, Image, StyleSheet, Animated } from 'react-native';
+import { View, Text, Button, Image, StyleSheet, Animated, Pressable } from 'react-native';
+import { ArrowLeftIcon } from 'react-native-heroicons/outline';
 
 const UserPage = ({ navigation }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current; // For fade-in animation
@@ -32,6 +33,11 @@ const UserPage = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Pressable onPress={() => navigation.navigate('Login')} style={styles.homeButton}>
+          <ArrowLeftIcon size={28} color="#fff" />
+        </Pressable>
+      </View>
       <Animated.View
         style={[
           styles.imageContainer,
@@ -61,6 +67,20 @@ const UserPage = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 1,
+    backgroundColor: '#000',
+    borderRadius: 20,
+    padding: 5,
+  },
+  homeButton: {
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -70,11 +90,13 @@ const styles = StyleSheet.create({
   image: {
     width: 300,
     height: 200,
+    resizeMode: 'contain',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginVertical: 20,
+    color: '#333',
   },
 });
 

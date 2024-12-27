@@ -1,31 +1,25 @@
-import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 
-const ConfirmationMessage = ({ route, navigation }) => {
-  const { bookingData } = route.params; // Retrieve the booking data passed from BookingTable
+const ConfirmationMessage = ({ route }) => {
+  const { bookingData } = route.params;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Booking Confirmation</Text>
-      <Text>Name: {bookingData.name}</Text>
-      <Text>Mobile No: {bookingData.mobile}</Text>
-      <Text>Table No: {bookingData.tableNo}</Text>
-      <Text>Date: {bookingData.date}</Text>
-      <Text>Time: {bookingData.time}</Text>
-      <Button title="Go Back" onPress={() => navigation.goBack()} />
+      <Text style={styles.title}>Booking Confirmed!</Text>
+      <Text style={styles.text}>Name: {bookingData.name}</Text>
+      <Text style={styles.text}>Mobile No: {bookingData.mobile_no}</Text>
+      <Text style={styles.text}>Table No: {bookingData.table_no}</Text>
+      <Text style={styles.text}>Date: {bookingData.date}</Text>
+      <Text style={styles.text}>Time: {bookingData.time}</Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
+  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "#f5f5f5" },
+  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
+  text: { fontSize: 18, marginBottom: 10 },
 });
 
 export default ConfirmationMessage;

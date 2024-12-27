@@ -1,35 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-  Image,
-  Pressable,
-  Animated,
-} from 'react-native';
-import {
-  ArrowLeftIcon,
-  EyeIcon,
-  EyeSlashIcon,
-} from 'react-native-heroicons/outline';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Image, Pressable, Animated } from 'react-native';
+import { ArrowLeftIcon, EyeIcon, EyeSlashIcon } from 'react-native-heroicons/outline';
 
 const LoginScreen = ({ navigation }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   // Animation references
-  const usernameSlide = useRef(new Animated.Value(900)).current;
-  const passwordSlide = useRef(new Animated.Value(900)).current; 
-  const buttonSlide = useRef(new Animated.Value(900)).current; 
+  const emailSlide = useRef(new Animated.Value(900)).current;
+  const passwordSlide = useRef(new Animated.Value(900)).current;
+  const buttonSlide = useRef(new Animated.Value(900)).current;
 
   // Run animations on mount
   useEffect(() => {
     Animated.sequence([
-      Animated.timing(usernameSlide, {
+      Animated.timing(emailSlide, {
         toValue: 0,
         duration: 500,
         useNativeDriver: true,
@@ -45,22 +31,46 @@ const LoginScreen = ({ navigation }) => {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [usernameSlide, passwordSlide, buttonSlide]);
+  }, [emailSlide, passwordSlide, buttonSlide]);
 
-  const handleLogin = () => {
-    if (!username || !password) {
-      Alert.alert('Login failed', 'Please enter both username and password');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Login Failed', 'Please enter both email and password.');
       return;
     }
 
-    console.log('Login attempted:', username, password);
-    if (username === 'admin' && password === 'adminpass') {
-      navigation.navigate('AdminPage');
-    } else if (username === 'User' && password === 'Userpass') {
-      navigation.navigate('UserPage');
-    } else {
-      Alert.alert('Login failed', 'Invalid username or password');
+    try {
+      const response = await fetch('http://192.168.29.148:8000/account_api/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        Alert.alert('Success', data.message);
+
+        // Navigate based on role
+        if (data.role === 'admin') {
+          navigation.navigate('AdminPage'); // Replace with your actual Admin screen
+        } else if (data.role === 'user') {
+          navigation.navigate('UserPage'); // Replace with your actual User screen
+        } else {
+          Alert.alert('Login Failed', 'Invalid role.');
+        }
+      } else {
+        throw new Error(data.message || 'Login failed.');
+      }
+    } catch (error) {
+      Alert.alert('Login Failed', error.message || 'An error occurred.');
     }
+  };
+
+  const handleRegister = () => {
+    navigation.navigate('RegisterScreen'); // Replace with your actual registration screen
   };
 
   return (
@@ -77,12 +87,12 @@ const LoginScreen = ({ navigation }) => {
       />
       <Text style={styles.title}>Login</Text>
 
-      {/* Username input */}
-      <Animated.View style={{ transform: [{ translateY: usernameSlide }], width: '100%' }}>
+      {/* Email input */}
+      <Animated.View style={{ transform: [{ translateY: emailSlide }], width: '100%' }}>
         <TextInput
-          placeholder="Username"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
           style={styles.input}
           placeholderTextColor="#aaa"
         />
@@ -115,6 +125,11 @@ const LoginScreen = ({ navigation }) => {
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
       </Animated.View>
+
+      {/* Register button */}
+      <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+        <Text style={styles.registerButtonText}>Don't have an account? Register</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -187,6 +202,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '800',
     fontFamily: 'sans-serif',
+  },
+  registerButton: {
+    marginTop: 20,
+  },
+  registerButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
   },
   img: {
     width: 250,
