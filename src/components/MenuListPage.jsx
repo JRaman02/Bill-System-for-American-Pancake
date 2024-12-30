@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, Image, Pressable, ActivityIndicator, Button } from 'react-native';
-import { HomeIcon } from 'react-native-heroicons/outline';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Image,
+  Pressable,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import { ArrowLeftIcon } from 'react-native-heroicons/outline';
 
 const MenuListPage = ({ navigation }) => {
   const [menuItems, setMenuItems] = useState([]);
@@ -27,7 +37,7 @@ const MenuListPage = ({ navigation }) => {
       await fetch(`http://192.168.29.148:8000/pancake_api/pancake/${id}/`, {
         method: 'DELETE',
       });
-      setMenuItems((prevItems) => prevItems.filter(item => item.id !== id));
+      setMenuItems((prevItems) => prevItems.filter((item) => item.id !== id));
     } catch (error) {
       console.error('Error deleting menu item:', error);
     }
@@ -35,44 +45,99 @@ const MenuListPage = ({ navigation }) => {
 
   const handleUpdate = async (id, updatedData) => {
     try {
+      const currentItem = menuItems.find((item) => item.id === id);
+      if (!currentItem) {
+        throw new Error('Item not found in state.');
+      }
+
+      const completeData = { ...currentItem, ...updatedData };
+
+      if (typeof completeData.price === 'string') {
+        completeData.price = parseFloat(completeData.price);
+      }
+
+      if (isNaN(completeData.price)) {
+        throw new Error('Price must be a valid number.');
+      }
+
       const response = await fetch(`http://192.168.29.148:8000/pancake_api/pancake/${id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify(completeData),
       });
-      
-      // Check if the response is successful
+
       if (!response.ok) {
-        throw new Error('Failed to update the item');
+        const errorMessage = await response.text();
+        console.error('API Error:', errorMessage);
+        throw new Error('Failed to update the item: ' + errorMessage);
       }
-  
+
       const updatedItem = await response.json();
-      console.log('Updated Item:', updatedItem); // Log the response for debugging
-  
-      setMenuItems((prevItems) => 
-        prevItems.map(item => item.id === id ? updatedItem : item)
+      setMenuItems((prevItems) =>
+        prevItems.map((item) => (item.id === id ? updatedItem : item))
       );
     } catch (error) {
       console.error('Error updating menu item:', error);
     }
   };
-  
+
+  const handleDeleteConfirmation = (id) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this item?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: () => handleDelete(id),
+          style: 'destructive',
+        },
+      ]
+    );
+  };
+
+  const handleUpdateConfirmation = (item) => {
+    Alert.alert(
+      'Confirm Update',
+      'Are you sure you want to update this item?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Update',
+          onPress: () => navigation.navigate('UpdateMenuPage', { pancake: item }),
+        },
+      ]
+    );
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <Image source={{ uri: item.image_url }} style={styles.image} />
       <View style={styles.textContainer}>
         <Text style={styles.pancakeName}>{item.name}</Text>
-        <Text style={styles.price}>{item.price}</Text>
+        <Text style={styles.price}>₹ {item.price}</Text>
         <Text style={styles.rating}>Rating: {item.rating} ⭐</Text>
       </View>
+
       <View style={styles.buttonsContainer}>
-        <Pressable onPress={() => handleUpdate(item.id, { name: 'Updated Pancake', price: 'Updated Price' })} style={styles.updateButton}>
+        <Pressable
+          onPress={() => handleUpdateConfirmation(item)}
+          style={styles.updateButton}
+        >
           <Text style={styles.buttonText}>Update</Text>
         </Pressable>
-        <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
+        <Pressable
+          onPress={() => handleDeleteConfirmation(item.id)}
+          style={styles.deleteButton}
+        >
           <Text style={styles.buttonText}>Delete</Text>
         </Pressable>
       </View>
@@ -80,16 +145,14 @@ const MenuListPage = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+ <ScrollView>
+     <View style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => navigation.navigate('Home')} style={styles.home}>
-          <HomeIcon size={28} color="black" />
+        <Pressable onPress={() => navigation.navigate('AdminPage')} style={styles.homeButton}>
+          <ArrowLeftIcon size={28} color="#0a0a0a" />
         </Pressable>
       </View>
-      <Image 
-        source={require('../assets/images/logo.png')} 
-        style={styles.img} 
-      />
+      <Image source={require('../assets/images/logo.png')} style={styles.img} />
       <Text style={styles.title}>Pancake Menu</Text>
       {loading ? (
         <ActivityIndicator size="large" color="#000" />
@@ -101,13 +164,14 @@ const MenuListPage = ({ navigation }) => {
         />
       )}
     </View>
+ </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 10,
     backgroundColor: '#fff',
   },
   title: {
@@ -117,7 +181,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   item: {
-    padding: 15,
+    padding: 10,
     marginVertical: 10,
     borderRadius: 5,
     backgroundColor: '#f9f9f9',
@@ -152,28 +216,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#888',
   },
-  time: {
-    fontSize: 14,
-    color: '#888',
-  },
-  cuisine: {
-    fontSize: 14,
-    color: '#888',
-  },
-  discount: {
-    fontSize: 14,
-    color: 'green',
-  },
   img: {
-    width: 300,
-    height: 200,
+    width: 150,
+    height: 100,
+    alignSelf: 'center', // Centers the image horizontally
+    marginVertical: 3,  // Adds some vertical spacing
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    paddingVertical: 10,
   },
-  home: {
+  homeButton: {
     marginLeft: 10,
   },
   buttonsContainer: {

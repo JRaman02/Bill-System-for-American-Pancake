@@ -28,6 +28,7 @@ const RestaurantCard = ({ restaurant, index }) => {
           onError={() => console.error('Image failed to load')} // Log errors if images fail
         />
         <Text style={styles.name}>{restaurant.name}</Text>
+        <Text style={styles.price}>₹ {restaurant.price}</Text>
         <Text style={styles.rating}>⭐ {restaurant.rating} • {restaurant.time}</Text>
       </Animated.View>
     </Pressable>
@@ -97,7 +98,7 @@ const RestaurantListScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f2f2f2',
   },
   loadingContainer: {
     flex: 1,
@@ -108,48 +109,71 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   card: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 15,
     margin: 10,
     width: wp('42%'),
-    padding: 10,
+    padding: 15,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5, // Adds shadow for Android
   },
   animatedCard: {
     width: '100%',
+    alignItems: 'center',
   },
   image: {
     width: '100%',
-    height: hp('15%'),
-    borderRadius: 10,
+    height: hp('20%'),
+    borderRadius: 15,
+    marginBottom: 10,
   },
   name: {
     fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 5,
+    fontWeight: '700',
+    marginVertical: 5,
     textAlign: 'center',
+    color: '#2c3e50',
+  },
+  price: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#27ae60',
   },
   rating: {
-    fontSize: 14,
-    color: 'gray',
+    fontSize: 13,
+    color: '#7f8c8d',
+    marginTop: 5,
   },
   loginButton: {
     position: 'absolute',
-    top: '2%',
-    right: '4%',
-    padding: 10,
-    borderRadius: 10,
+    top: '1%',
+    right: '5%',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
     backgroundColor: '#3498db',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   loginText: {
     color: 'white',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   img: {
-    width: '100%', 
-    height: 200,  
+    width: '100%',
+    height: 200,
     marginBottom: 20,
+    resizeMode: 'contain',
   },
 });
+
 
 export default RestaurantListScreen;

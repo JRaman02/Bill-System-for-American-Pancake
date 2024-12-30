@@ -4,14 +4,14 @@ import { useRoute } from '@react-navigation/native';
 
 const RecipeDetailScreen = () => {
   const route = useRoute();
-  const { restaurantId } = route.params || {}; // Fetch the restaurant ID from route params
+  const { restaurantId } = route.params || {};
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     if (restaurantId) {
-      fetch(`http://192.168.29.148:8000/pancake_api/pancake/${restaurantId}/`)  // Fetch restaurant details by ID
+      fetch(`http://192.168.29.148:8000/pancake_api/pancake/${restaurantId}/`)
         .then((response) => {
           if (!response.ok) {
             throw new Error('Failed to fetch restaurant data');
@@ -61,10 +61,9 @@ const RecipeDetailScreen = () => {
     <View style={styles.container}>
       <Image source={{ uri: restaurant.image_url }} style={styles.image} />
       <Text style={styles.name}>{restaurant.name}</Text>
-      <Text style={styles.rating}>⭐ {restaurant.rating}</Text>
-      <Text style={styles.price}>{restaurant.price}</Text>
-      <Text style={styles.time}>Delivery Time: {restaurant.time}</Text>
-      {/* Add more details or any other relevant information */}
+      <Text style={styles.price}>₹ {restaurant.price}</Text>
+      <Text style={styles.rating}>Rating: {restaurant.rating} ⭐</Text>
+      <Text style={styles.time}>Preparation Time: {restaurant.time} minutes</Text>
     </View>
   );
 };

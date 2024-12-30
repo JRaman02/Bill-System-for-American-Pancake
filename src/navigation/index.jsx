@@ -19,6 +19,7 @@ import menuItems from '../components/menuItems';
 import TPPage from '../components/TPPage';
 import OrderListPage from '../components/OrderListPage';
 import OrderDetailPage from '../components/OrderDetailPage';
+import UpdateMenuPage from '../components/UpdateMenuPage';
 
 
 
@@ -50,7 +51,7 @@ function AppNavigation() {
                 <Stack.Screen name='TPPage' component={TPPage} />
                 <Stack.Screen name='OrderListPage' component={OrderListPage} />
                 <Stack.Screen name="OrderDetail" component={OrderDetailPage} />
-                
+                <Stack.Screen name='UpdateMenuPage' component={UpdateMenuPage} />
                    
             </Stack.Navigator>
         </NavigationContainer>
