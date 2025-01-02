@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet, Pressable, Animated, ActivityIndicator } from 'react-native';
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { useNavigation } from '@react-navigation/native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
+// RestaurantCard Component
 const RestaurantCard = ({ restaurant, index }) => {
   const navigation = useNavigation();
   const slideAnim = useRef(new Animated.Value(-wp('100%'))).current;
@@ -11,7 +12,7 @@ const RestaurantCard = ({ restaurant, index }) => {
     Animated.timing(slideAnim, {
       toValue: 0,
       duration: 500,
-      delay: index * 100, // Adds staggered animation
+      delay: index * 100,
       useNativeDriver: true,
     }).start();
   }, [slideAnim, index]);
@@ -19,13 +20,13 @@ const RestaurantCard = ({ restaurant, index }) => {
   return (
     <Pressable 
       style={styles.card} 
-      onPress={() => navigation.navigate('RecipeDetailScreen', { restaurantId: restaurant.id })}  
+      onPress={() => navigation.navigate('RecipeDetailScreen', { restaurantId: restaurant.id })}
     >
-      <Animated.View style={[styles.animatedCard, { transform: [{ translateX: slideAnim }] }]} >
+      <Animated.View style={[styles.animatedCard, { transform: [{ translateX: slideAnim }] }]}>
         <Image 
-          source={{ uri: restaurant.image_url }} // Use image_url from API response
+          source={{ uri: restaurant.image_url }} 
           style={styles.image} 
-          onError={() => console.error('Image failed to load')} // Log errors if images fail
+          onError={() => console.error('Image failed to load')}
         />
         <Text style={styles.name}>{restaurant.name}</Text>
         <Text style={styles.price}>₹ {restaurant.price}</Text>
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
-    elevation: 5, // Adds shadow for Android
+    elevation: 5, 
   },
   animatedCard: {
     width: '100%',
@@ -144,9 +145,9 @@ const styles = StyleSheet.create({
     color: '#27ae60',
   },
   rating: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#7f8c8d',
-    marginTop: 5,
+    marginTop: 1,
   },
   loginButton: {
     position: 'absolute',
@@ -174,6 +175,5 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
 });
-
 
 export default RestaurantListScreen;

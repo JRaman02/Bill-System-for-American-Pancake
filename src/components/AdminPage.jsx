@@ -85,14 +85,22 @@ const AdminPage = ({ navigation }) => {
       {/* Button Grid */}
       <View style={styles.buttonGrid}>
         {['View Menu', 'Add Menu', 'Add Table', 'Table Booking', 'Home Delivery', 'Pancake'].map(
-          (title) => (
+          (title, index) => (
             <Animated.View
               key={title}
               style={[
                 styles.buttonWrapper,
                 {
                   opacity: buttonOpacity,
-                  transform: [{ scale: buttonScale }],
+                  transform: [
+                    { scale: buttonScale },
+                    {
+                      rotate: buttonOpacity.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['-15deg', '0deg'],
+                      }),
+                    },
+                  ],
                 },
               ]}
             >
@@ -126,7 +134,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#02b541',
+    backgroundColor: '#03ff5b',
   },
   header: {
     position: 'absolute',
@@ -163,7 +171,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   button: {
-    backgroundColor: '#b0128b',
+    backgroundColor: '#1f02fa',
     paddingVertical: 15,
     borderRadius: 12,
     alignItems: 'center',

@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  FlatList,
+  StyleSheet,
+  Pressable,
+} from 'react-native';
+import { ArrowLeftIcon } from 'react-native-heroicons/solid'; // Assuming you're using `react-native-heroicons`
 
-const AddTablePage = () => {
+const AddTablePage = ({ navigation }) => {
   const [tableData, setTableData] = useState([]);
-  const [inputValue, setInputValue] = useState('');
-  const [tableType, setTableType] = useState('single'); // You can change this as needed
+  const [tableNumber, setTableNumber] = useState('');
+  const [tableType, setTableType] = useState('');
 
   const addEntry = () => {
-    if (inputValue.trim()) {
+    if (tableNumber.trim()) {
       const newTable = {
-        number: inputValue,
+        number: tableNumber,
         type: tableType,
       };
 
@@ -24,8 +33,12 @@ const AddTablePage = () => {
         .then((response) => response.json())
         .then((data) => {
           // Add the new table data to the state with the returned ID from the API
-          setTableData([...tableData, { id: data.id, value: data.number }]);
-          setInputValue('');
+          setTableData([
+            ...tableData,
+            { id: data.id, number: data.number, type: data.type },
+          ]);
+          setTableNumber('');
+          setTableType('');
         })
         .catch((error) => {
           console.error('Error adding table:', error);
@@ -35,26 +48,39 @@ const AddTablePage = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
-      <Text>{`Table Number: ${item.value}, Type: ${item.type || 'N/A'}`}</Text>
+      <Text style={styles.itemText}>{`Table Number: ${item.number}, Type: ${item.type}`}</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Add Table Entry</Text>
+      <View style={styles.headerContainer}>
+        <Pressable
+          onPress={() => navigation.navigate('AdminPage')}
+          style={styles.homeButton}
+        >
+          <ArrowLeftIcon size={28} color="#fff" />
+        </Pressable>
+        <Text style={styles.header}>Add Table Entry</Text>
+      </View>
       <TextInput
         style={styles.input}
         placeholder="Enter table number"
-        value={inputValue}
-        onChangeText={setInputValue}
+        placeholderTextColor="#7f8c8d"
+        value={tableNumber}
+        onChangeText={setTableNumber}
+        keyboardType="numeric"
       />
       <TextInput
         style={styles.input}
-        placeholder="type"
-        value={inputValue}
-        onChangeText={setInputValue}
+        placeholder="Enter table type (e.g., Friend, couples)"
+        placeholderTextColor="#7f8c8d"
+        value={tableType}
+        onChangeText={setTableType}
       />
-      <Button title="Add Entry" onPress={addEntry} />
+      <Pressable style={styles.addButton} onPress={addEntry}>
+        <Text style={styles.addButtonText}>Add Entry</Text>
+      </Pressable>
       <FlatList
         data={tableData}
         renderItem={renderItem}
@@ -68,20 +94,43 @@ const AddTablePage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#ecf0f1',
     padding: 20,
-    backgroundColor: '#fff',
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   header: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginLeft: 25,
+    color: '#2c3e50',
+   
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
+    height: 50,
+    borderColor: '#bdc3c7',
     borderWidth: 1,
+    marginBottom: 15,
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    backgroundColor: '#fff',
+    fontSize: 16,
+    color: '#34495e',
+  },
+  addButton: {
+    backgroundColor: '#27ae60',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
     marginBottom: 20,
-    paddingHorizontal: 10,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   list: {
     marginTop: 20,
@@ -89,7 +138,20 @@ const styles = StyleSheet.create({
   item: {
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#ecf0f1',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  itemText: {
+    fontSize: 16,
+    color: '#2c3e50',
+  },
+  homeButton: {
+    padding: 10,
+    marginLeft: 1,
+    borderRadius: 50,
+    backgroundColor: '#77e6f7',
   },
 });
 

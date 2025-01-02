@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FlatList, View, Text, Image, StyleSheet, Button, Pressable, Alert, Animated, ActivityIndicator } from 'react-native';
+import { FlatList, View, Text, Image, StyleSheet, Button, Pressable, Alert, Animated, ActivityIndicator, ScrollView } from 'react-native';
 import RNPrint from 'react-native-print';
 import { HomeIcon } from 'react-native-heroicons/outline';
 
@@ -90,12 +90,13 @@ const PancakePage = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Pressable onPress={() => navigation.navigate('Home')} style={styles.home}>
+        <Pressable onPress={() => navigation.navigate('AdminPage')} style={styles.home}>
           <HomeIcon size={28} color="black" />
         </Pressable>
       </View>
+
       <Animated.Image
         source={logo}
         style={[
@@ -112,6 +113,7 @@ const PancakePage = ({ navigation }) => {
           },
         ]}
       />
+
       <FlatList
         data={menuItems}
         keyExtractor={(item) => item.id}
@@ -126,13 +128,14 @@ const PancakePage = ({ navigation }) => {
           </View>
         )}
       />
+
       <View style={styles.billContainer}>
         <Text style={styles.totalBill}>
           Total Bill: Rs {animatedBill}
         </Text>
         <Button title="Generate PDF Bill" onPress={generateBillPdf} />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

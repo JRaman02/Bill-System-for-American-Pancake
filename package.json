@@ -43,6 +43,7 @@
     "react-native-screens": "^3.34.0",
     "react-native-share": "^11.0.4",
     "react-native-svg": "^15.7.1",
+    "react-native-toast-message": "^2.2.1",
     "react-native-vector-icons": "^10.2.0",
     "react-native-webview": "^13.12.3",
     "react-native-youtube-iframe": "^2.3.0",

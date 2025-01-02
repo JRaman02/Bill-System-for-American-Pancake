@@ -20,6 +20,7 @@ import TPPage from '../components/TPPage';
 import OrderListPage from '../components/OrderListPage';
 import OrderDetailPage from '../components/OrderDetailPage';
 import UpdateMenuPage from '../components/UpdateMenuPage';
+import Toast from 'react-native-toast-message';
 
 
 
@@ -55,6 +56,7 @@ function AppNavigation() {
                    
             </Stack.Navigator>
         </NavigationContainer>
+        
     );
 }
 
